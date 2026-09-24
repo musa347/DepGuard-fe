@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# Windows metadata files
+*:Zone.Identifier
+
+# Lockfile — project uses bun.lock
+package-lock.json
