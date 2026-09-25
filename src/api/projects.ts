@@ -1,19 +1,23 @@
-import { Project, ApiProject } from '../types';
+import { Project, ApiProject, ApiScan } from '../types';
 import { apiClient } from './client';
 
-function toProject(p: ApiProject): Project {
+function toProject(p: ApiProject, latestScan?: ApiScan): Project {
   return {
     id: p.id,
     name: p.name,
     repositoryUrl: p.repositoryUrl.replace(/^https?:\/\//, ''),
-    branch: p.defaultBranch,
-    latestCommit: { sha: '', message: '', date: p.createdAt },
-    lastScanAt: p.createdAt,
-    dependencyCount: 0,
-    directCount: 0,
-    transitiveCount: 0,
+    branch: p.defaultBranch ?? latestScan?.branch ?? '',
+    latestCommit: {
+      sha: latestScan?.commitSha ?? '',
+      message: '',
+      date: latestScan?.completedAt ?? latestScan?.startedAt ?? p.createdAt,
+    },
+    lastScanAt: latestScan?.completedAt ?? latestScan?.startedAt ?? p.createdAt,
+    dependencyCount: latestScan?.dependencyCount ?? 0,
+    directCount: latestScan?.dependencies?.filter((d) => d.direct).length ?? 0,
+    transitiveCount: latestScan?.dependencies?.filter((d) => !d.direct).length ?? 0,
     health: 'UNKNOWN',
-    scanStatus: 'COMPLETED',
+    scanStatus: (latestScan?.status as Project['scanStatus']) ?? 'COMPLETED',
     highRiskCount: 0,
     criticalCount: 0,
     eolCount: 0,
@@ -23,14 +27,31 @@ function toProject(p: ApiProject): Project {
   };
 }
 
+async function fetchLatestScan(projectId: string): Promise<ApiScan | undefined> {
+  try {
+    const res = await apiClient<ApiScan>(`/api/projects/${projectId}/scans/latest`);
+    return res;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function fetchProjects(): Promise<Project[]> {
   const data = await apiClient<ApiProject[]>('/api/projects');
-  return data.map(toProject);
+  return Promise.all(
+    data.map(async (p) => {
+      const latestScan = await fetchLatestScan(p.id);
+      return toProject(p, latestScan);
+    })
+  );
 }
 
 export async function fetchProjectById(projectId: string): Promise<Project | null> {
-  const data = await apiClient<ApiProject>(`/api/projects/${projectId}`);
-  return toProject(data);
+  const [data, latestScan] = await Promise.all([
+    apiClient<ApiProject>(`/api/projects/${projectId}`),
+    fetchLatestScan(projectId),
+  ]);
+  return toProject(data, latestScan);
 }
 
 export async function createProject(data: {
