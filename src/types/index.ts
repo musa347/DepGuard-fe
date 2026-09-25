@@ -24,6 +24,14 @@ export interface ApiScan {
   completedAt: string | null;
   errorMessage: string | null;
   dependencyCount: number;
+  riskSummary: {
+    overallHealth: RiskLevel;
+    criticalCount: number;
+    highCount: number;
+    mediumCount: number;
+    lowCount: number;
+    eolCount: number;
+  } | null;
   dependencies: ApiScanDependency[];
 }
 
