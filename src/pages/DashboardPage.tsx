@@ -11,7 +11,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   ExternalLink,
-  Code2,
 } from 'lucide-react';
 import { useProjects } from '../hooks/useProjects';
 import { useTriggerScan } from '../hooks/useScans';
@@ -51,18 +50,10 @@ export const DashboardPage: React.FC = () => {
             Dashboard
           </h1>
           <p className="text-sm text-[#64748B] mt-1">
-            Deterministic Maven POM AST intelligence, CVE heuristics, and lifecycle tracking
+            Maven dependency intelligence — EOL status, security advisories, and upgrade recommendations
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/ui-states')}
-            className="px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-[#E2E8F0] rounded-md hover:bg-slate-50 transition-colors flex items-center gap-1.5 shadow-xs"
-            title="Inspect approved Screen 8 states"
-          >
-            <Code2 className="w-3.5 h-3.5 text-slate-500" />
-            UI States & Edge Cases
-          </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="px-3.5 py-2 text-xs font-semibold text-white bg-[#2563EB] rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1.5 shadow-xs"
